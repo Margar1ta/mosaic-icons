@@ -56,6 +56,7 @@ var CODEPOINTS = {
 };
 
 const PATH_BUILD_ICONS = './build/icons',
+    PATH_DIST_INFO = './build/info',
     PATH_DIST_FONTS = './dist/fonts',
     PATH_DIST_STYLES = './dist/styles',
     PATH_DIST_HTML = './dist/html';
@@ -83,6 +84,14 @@ module.exports = function (grunt) {
                 },
                 src: sketch_file,
                 dest: PATH_BUILD_ICONS
+            }
+        },
+        json_generator: {
+            your_target: {
+                dest: PATH_DIST_INFO,
+                options: {
+                    // Your json file goes here
+                }
             }
         },
         embedFonts: {
@@ -122,7 +131,7 @@ module.exports = function (grunt) {
         shell: {
             publish: {command: 'npm publish'},
             svgfromsubfolder : {
-                command: 'find ' + PATH_BUILD_ICONS + ' -mindepth 2 -type f -print -exec mv {} ' + PATH_BUILD_ICONS + '/ \\;'  
+                command: 'find ' + PATH_BUILD_ICONS + ' -mindepth 2 -type f -print -exec mv {} ' + PATH_BUILD_ICONS + '/ \\;'
               },
             svgrename: {
                 command: 'cd build/icons && for f in *.svg; do mv "$f" "${f#mc-}"; done'
@@ -171,7 +180,18 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-embed-fonts');
     grunt.loadNpmTasks('grunt-rename-util');
     grunt.loadNpmTasks('grunt-text-replace');
+    grunt.loadNpmTasks('grunt-json-generator');
 
     grunt.registerTask('publish', ['sketch_export:run', 'shell:svgfromsubfolder', 'shell:svgrename', 'replace:remove_mask', 'webfont:run', 'rename:main', 'embedFonts', 'shell:svgcopytobuild', 'shell:publish']);
     grunt.registerTask('default', ['sketch_export:run', 'shell:svgfromsubfolder', 'shell:svgrename', 'replace:remove_mask', 'webfont:run', 'rename:main', 'embedFonts', 'shell:svgcopytobuild', ]);
+
+    function generateIconJSON() {
+        const json = {};
+        Object.entries(CODEPOINTS).forEach((iconCode, iconName) => {
+            json[iconName] = {
+                code: iconCode,
+                icon: `${iconName}.svg`
+            }
+        });
+    }
 };
