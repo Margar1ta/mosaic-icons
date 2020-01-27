@@ -68,6 +68,8 @@ module.exports = function (grunt) {
 
     let sketch_file = grunt.option('file');
 
+    const iconTags = grunt.file.readJSON('icon-tags.json');
+
     if (sketch_file === undefined || sketch_file === true) {
         sketch_file = SKETCH_FILE_DEF;
     }
@@ -92,6 +94,26 @@ module.exports = function (grunt) {
                 options: {
                     // Your json file goes here
                 }
+            }
+        },
+        json: {
+            main: {
+                options: {
+                    namespace: 'myjson',
+                    includePath: true,
+                    processName: function(filename) {
+                        return filename.toLowerCase();
+                    },
+                    processContent: function(content) {
+                        Object.entries(content).forEach(() => {
+
+                        })
+                        content.myVar = 'myVal';
+                        return content;
+                    }
+                },
+                src: ['path/to/source/**/*.json'],
+                dest: 'path/to/compiled/json.js'
             }
         },
         embedFonts: {
@@ -181,6 +203,8 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-rename-util');
     grunt.loadNpmTasks('grunt-text-replace');
     grunt.loadNpmTasks('grunt-json-generator');
+    grunt.loadNpmTasks('grunt-json');
+
 
     grunt.registerTask('publish', ['sketch_export:run', 'shell:svgfromsubfolder', 'shell:svgrename', 'replace:remove_mask', 'webfont:run', 'rename:main', 'embedFonts', 'shell:svgcopytobuild', 'shell:publish']);
     grunt.registerTask('default', ['sketch_export:run', 'shell:svgfromsubfolder', 'shell:svgrename', 'replace:remove_mask', 'webfont:run', 'rename:main', 'embedFonts', 'shell:svgcopytobuild', ]);
